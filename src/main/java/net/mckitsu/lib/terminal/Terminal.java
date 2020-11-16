@@ -22,9 +22,14 @@ public abstract class Terminal {
     private final TerminalRunnable terminalRunnable;
 
     /**
+     * When service start finish after call this method.
+     */
+    protected abstract void onFinish();
+
+    /**
      * When service start after call this method.
      */
-    protected abstract void onStart();
+    protected abstract boolean onStart();
 
     /**
      * When service load after call this method.
@@ -46,7 +51,7 @@ public abstract class Terminal {
         this.isAsynchronous = false;
         this.add(new Help(this.commandMap));
         this.add(new Stop(this::onStop, this::terminalStop));
-        this.add(new Restart(this::onStart, this::onLoad, this::onStop));
+        this.add(new Restart(this::restart));
         this.add(new Reload(this::onLoad));
         this.terminalRunnable = new TerminalRunnable();
         this.logger = TerminalLogger.logger;
@@ -99,6 +104,25 @@ public abstract class Terminal {
             this.terminalRunnable.run();
     }
 
+    public void restart(){
+        TerminalLogger.info("Service Stopping...");
+        this.onStop();
+
+        TerminalLogger.logger.info("Service Stop!");
+        Terminal.this.logger.info("Service starting...");
+
+        if(!onStart()){
+            Terminal.this.logger.severe("Service start fail!");
+            Terminal.this.logger.severe("Ending program.");
+            terminalStop();
+            return;
+        }
+
+        onLoad();
+        Terminal.this.logger.info("Service start!");
+        onFinish();
+    }
+
     private void terminalStop(){
         this.isStart = false;
     }
@@ -142,9 +166,14 @@ public abstract class Terminal {
         public void run() {
             Terminal.this.logger.info("Service starting...");
             Scanner scanner = new Scanner(System.in);
-            onStart();
+            if(!onStart()){
+                Terminal.this.logger.severe("Service start fail!");
+                Terminal.this.logger.severe("Ending program.");
+                return;
+            }
             onLoad();
             Terminal.this.logger.info("Service start!");
+            onFinish();
 
 
             while(isStart){

@@ -3,9 +3,18 @@ package net.mckitsu.lib.terminal;
 public class Main {
     public static void main(String[] args){
         Terminal terminal = new Terminal() {
+            boolean tmp = true;
+
             @Override
-            protected void onStart() {
+            protected void onFinish() {
+                System.out.println("onFinish");
+                tmp = false;
+            }
+
+            @Override
+            protected boolean onStart() {
                 System.out.println("onStart");
+                return tmp;
             }
 
             @Override
