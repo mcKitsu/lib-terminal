@@ -24,7 +24,7 @@ public interface TerminalCommand {
     /**
      * Show how to use this command.
      *
-     * @return This command help information.
+     * @return Description.
      */
     String getHelp();
 
@@ -32,15 +32,15 @@ public interface TerminalCommand {
      * When terminal input match this command will do this method.
      *
      * @param args Input arguments.
-     * @return true:Finish; false:fail;
+     * @return Command help information;
      */
-    boolean handle(String[] args);
+    boolean handle(Terminal terminal, String[] args);
 
     /**
      * This is a read only string, it will show this string when user input help.
      * <p>example: COMMAND [args0]</p>
      *
-     * @return true:Finish; false:fail;
+     * @return Command format;
      */
     String getCommandFormat();
 }

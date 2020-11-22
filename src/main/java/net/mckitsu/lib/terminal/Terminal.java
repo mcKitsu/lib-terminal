@@ -1,25 +1,22 @@
 package net.mckitsu.lib.terminal;
 
-import net.mckitsu.lib.terminal.command.Help;
-import net.mckitsu.lib.terminal.command.Reload;
-import net.mckitsu.lib.terminal.command.Restart;
-import net.mckitsu.lib.terminal.command.Stop;
-
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * 終端機指令介面.
  *
  * @author  ZxyKira
- * @version 0.1.0
  */
 public abstract class Terminal {
     public final Map<String, TerminalCommand> commandMap;
 
     private boolean isStart;
-    private boolean isAsynchronous;
     private java.util.logging.Logger logger;
-    private final TerminalRunnable terminalRunnable;
+
+    /* **************************************************************************************
+     *  Abstract method
+     */
 
     /**
      * When service start finish after call this method.
@@ -41,6 +38,14 @@ public abstract class Terminal {
      */
     protected abstract void onStop();
 
+    protected abstract String onRead();
+
+    protected abstract void onUnknownCommand(String[] args);
+
+    /* **************************************************************************************
+     *  Construct method
+     */
+
     /**
      * Construction.
      *
@@ -48,13 +53,11 @@ public abstract class Terminal {
     public Terminal(){
         this.commandMap = new HashMap<>();
         this.isStart = false;
-        this.isAsynchronous = false;
-        this.add(new Help(this.commandMap));
-        this.add(new Stop(this::onStop, this::terminalStop));
-        this.add(new Restart(this::restart));
-        this.add(new Reload(this::onLoad));
-        this.terminalRunnable = new TerminalRunnable();
-        this.logger = TerminalLogger.logger;
+        this.add(new CommandHelp(this.commandMap));
+        this.add(new CommandStop());
+        this.add(new CommandRestart());
+        this.add(new CommandReload());
+        this.logger = java.util.logging.Logger.getGlobal();
     }
 
     /**
@@ -66,6 +69,10 @@ public abstract class Terminal {
         this();
         this.logger = logger;
     }
+
+    /* **************************************************************************************
+     *  Public method
+     */
 
     /**
      * Add a new command into {@link Terminal}
@@ -98,17 +105,14 @@ public abstract class Terminal {
 
         this.isStart = true;
 
-        if(this.isAsynchronous)
-            new Thread(this.terminalRunnable);
-        else
-            this.terminalRunnable.run();
+        this.terminalRunnable();
     }
 
     public void restart(){
-        TerminalLogger.info("Service Stopping...");
+        this.logger.info("Service Stopping...");
         this.onStop();
 
-        TerminalLogger.logger.info("Service Stop!");
+        this.logger.info("Service Stop!");
         Terminal.this.logger.info("Service starting...");
 
         if(!onStart()){
@@ -123,8 +127,8 @@ public abstract class Terminal {
         onFinish();
     }
 
-    private void terminalStop(){
-        this.isStart = false;
+    public Logger getLogger() {
+        return logger;
     }
 
     /**
@@ -135,14 +139,21 @@ public abstract class Terminal {
         commandHandle("stop");
     }
 
-    /**
-     *
-     * @param enable set service run as asynchronous.
-     */
-    public void setAsynchronous(boolean enable){
-        if(!isStart)
-            this.isAsynchronous = enable;
+    public String readLine(){
+        return onRead();
     }
+
+    /* **************************************************************************************
+     *  protected method
+     */
+
+    protected void terminalStop(){
+        this.isStart = false;
+    }
+
+    /* **************************************************************************************
+     *  Private method
+     */
 
     private void commandHandle(String command){
         String[] args = command.split(" ");
@@ -154,32 +165,28 @@ public abstract class Terminal {
 
         TerminalCommand terminalCommand = get(args[0]);
         if(terminalCommand != null)
-            result = terminalCommand.handle(args);
+            result = terminalCommand.handle(this, args);
 
         if(!result){
-            TerminalLogger.info("Unknown command '%s' - try 'help'\n", args[0]);
+            this.onUnknownCommand(args);
         }
     }
 
-    private class TerminalRunnable implements Runnable{
-        @Override
-        public void run() {
-            Terminal.this.logger.info("Service starting...");
-            Scanner scanner = new Scanner(System.in);
-            if(!onStart()){
-                Terminal.this.logger.severe("Service start fail!");
-                Terminal.this.logger.severe("Ending program.");
-                return;
-            }
-            onLoad();
-            Terminal.this.logger.info("Service start!");
-            onFinish();
+    private void terminalRunnable(){
+        Terminal.this.logger.info("Service starting...");
+
+        if(!onStart()){
+            Terminal.this.logger.severe("Service start fail!");
+            Terminal.this.logger.severe("Ending program.");
+            return;
+        }
+        onLoad();
+        Terminal.this.logger.info("Service start!");
+        onFinish();
 
 
-            while(isStart){
-                String input = scanner.nextLine();
-                commandHandle(input);
-            }
+        while(isStart){
+            commandHandle(onRead());
         }
     }
 }

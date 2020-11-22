@@ -1,15 +1,12 @@
-package net.mckitsu.lib.terminal.command;
+package net.mckitsu.lib.terminal;
 
-import net.mckitsu.lib.terminal.Terminal;
-import net.mckitsu.lib.terminal.TerminalCommand;
-import net.mckitsu.lib.terminal.TerminalLogger;
 
 import java.util.Map;
 
-public class Help implements TerminalCommand {
+public class CommandHelp implements TerminalCommand {
     private final Map<String, TerminalCommand> commandMap;
 
-    public Help(Map<String, TerminalCommand> commandMap){
+    public CommandHelp(Map<String, TerminalCommand> commandMap){
         this.commandMap = commandMap;
     }
 
@@ -30,7 +27,7 @@ public class Help implements TerminalCommand {
     }
 
     @Override
-    public boolean handle(String[] args) {
+    public boolean handle(Terminal terminal, String[] args) {
         StringBuilder logout = new StringBuilder();
 
         if(args.length>=2){
@@ -54,7 +51,7 @@ public class Help implements TerminalCommand {
                 logout.append(String.format("Unknown command '%s' - try 'help'\n", args[1]));
         }
 
-        TerminalLogger.info(logout.toString());
+        terminal.getLogger().info(logout.toString());
         return true;
     }
 

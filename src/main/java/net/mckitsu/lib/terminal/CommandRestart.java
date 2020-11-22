@@ -1,15 +1,7 @@
-package net.mckitsu.lib.terminal.command;
+package net.mckitsu.lib.terminal;
 
-import net.mckitsu.lib.terminal.Terminal;
-import net.mckitsu.lib.terminal.TerminalCommand;
-import net.mckitsu.lib.terminal.TerminalLogger;
 
-public class Restart implements TerminalCommand {
-    private final Runnable restart;
-
-    public Restart(Runnable restart){
-        this.restart = restart;
-    }
+public class CommandRestart implements TerminalCommand {
 
     @Override
     public String getCommand() {
@@ -28,9 +20,8 @@ public class Restart implements TerminalCommand {
     }
 
     @Override
-    public boolean handle(String[] args) {
-        if(this.restart != null)
-            restart.run();
+    public boolean handle(Terminal terminal, String[] args) {
+        terminal.restart();
         return true;
     }
 
