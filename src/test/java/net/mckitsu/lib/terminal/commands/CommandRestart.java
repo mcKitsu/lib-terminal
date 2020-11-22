@@ -1,15 +1,19 @@
-package net.mckitsu.lib.terminal;
+package net.mckitsu.lib.terminal.commands;
 
-public class CommandStop implements TerminalCommand {
+
+import net.mckitsu.lib.terminal.Terminal;
+import net.mckitsu.lib.terminal.TerminalCommand;
+
+public class CommandRestart implements TerminalCommand {
 
     @Override
     public String getCommand() {
-        return "stop";
+        return "restart";
     }
 
     @Override
     public String getDescription() {
-        return "Stop service.";
+        return "Restart service.";
     }
 
     @Override
@@ -20,15 +24,12 @@ public class CommandStop implements TerminalCommand {
 
     @Override
     public boolean handle(Terminal terminal, String[] args) {
-        terminal.onStop();
-        terminal.getLogger().info("Service stopping...");
-        terminal.terminalStop();
-        terminal.getLogger().info("Service stop!");
+        terminal.getLogger().info("Restart");
         return true;
     }
 
     @Override
     public String getCommandFormat() {
-        return "stop";
+        return "restart";
     }
 }

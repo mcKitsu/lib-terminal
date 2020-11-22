@@ -1,5 +1,8 @@
-package net.mckitsu.lib.terminal;
+package net.mckitsu.lib.terminal.commands;
 
+
+import net.mckitsu.lib.terminal.Terminal;
+import net.mckitsu.lib.terminal.TerminalCommand;
 
 import java.util.Map;
 

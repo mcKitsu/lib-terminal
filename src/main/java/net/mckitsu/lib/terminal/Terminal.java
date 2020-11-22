@@ -9,7 +9,7 @@ import java.util.logging.Logger;
  * @author  ZxyKira
  */
 public abstract class Terminal {
-    public final Map<String, TerminalCommand> commandMap;
+    private Map<String, TerminalCommand> commands;
 
     private boolean isStart;
     private java.util.logging.Logger logger;
@@ -17,26 +17,10 @@ public abstract class Terminal {
     /* **************************************************************************************
      *  Abstract method
      */
-
-    /**
-     * When service start finish after call this method.
-     */
-    protected abstract void onFinish();
-
     /**
      * When service start after call this method.
      */
     protected abstract boolean onStart();
-
-    /**
-     * When service load after call this method.
-     */
-    protected abstract void onLoad();
-
-    /**
-     * When service stop after call this method.
-     */
-    protected abstract void onStop();
 
     protected abstract String onRead();
 
@@ -51,13 +35,13 @@ public abstract class Terminal {
      *
      */
     public Terminal(){
-        this.commandMap = new HashMap<>();
+        this(new HashMap<>(), java.util.logging.Logger.getGlobal());
+    }
+
+    public Terminal(Map<String, TerminalCommand> commands, Logger logger){
         this.isStart = false;
-        this.add(new CommandHelp(this.commandMap));
-        this.add(new CommandStop());
-        this.add(new CommandRestart());
-        this.add(new CommandReload());
-        this.logger = java.util.logging.Logger.getGlobal();
+        this.commands = commands;
+        this.logger = logger;
     }
 
     /**
@@ -66,13 +50,20 @@ public abstract class Terminal {
      * @param logger system logger.
      */
     public Terminal(java.util.logging.Logger logger){
-        this();
+        this(new HashMap<>(), logger);
         this.logger = logger;
     }
 
     /* **************************************************************************************
      *  Public method
      */
+    public Map<String, TerminalCommand> getCommands(){
+        return this.commands;
+    }
+
+    public void executeCommand(String input){
+        this.commandHandle(input);
+    }
 
     /**
      * Add a new command into {@link Terminal}
@@ -80,11 +71,11 @@ public abstract class Terminal {
      * @param command {@link TerminalCommand}
      */
     public void add(TerminalCommand command){
-        this.commandMap.put(command.getCommand().toLowerCase(), command);
+        this.commands.put(command.getCommand().toLowerCase(), command);
     }
 
     public TerminalCommand get(String command){
-        return this.commandMap.get(command.toLowerCase());
+        return this.commands.get(command.toLowerCase());
     }
 
     /**
@@ -93,7 +84,7 @@ public abstract class Terminal {
      * @param command {@link TerminalCommand}
      */
     public void remove(TerminalCommand command){
-        this.commandMap.remove(command.getCommand().toLowerCase());
+        this.commands.remove(command.getCommand().toLowerCase());
     }
 
     /**
@@ -108,25 +99,6 @@ public abstract class Terminal {
         this.terminalRunnable();
     }
 
-    public void restart(){
-        this.logger.info("Service Stopping...");
-        this.onStop();
-
-        this.logger.info("Service Stop!");
-        Terminal.this.logger.info("Service starting...");
-
-        if(!onStart()){
-            Terminal.this.logger.severe("Service start fail!");
-            Terminal.this.logger.severe("Ending program.");
-            terminalStop();
-            return;
-        }
-
-        onLoad();
-        Terminal.this.logger.info("Service start!");
-        onFinish();
-    }
-
     public Logger getLogger() {
         return logger;
     }
@@ -136,7 +108,7 @@ public abstract class Terminal {
      *
      */
     public void stop(){
-        commandHandle("stop");
+        this.isStart = false;
     }
 
     public String readLine(){
@@ -146,10 +118,6 @@ public abstract class Terminal {
     /* **************************************************************************************
      *  protected method
      */
-
-    protected void terminalStop(){
-        this.isStart = false;
-    }
 
     /* **************************************************************************************
      *  Private method
@@ -173,18 +141,7 @@ public abstract class Terminal {
     }
 
     private void terminalRunnable(){
-        Terminal.this.logger.info("Service starting...");
-
-        if(!onStart()){
-            Terminal.this.logger.severe("Service start fail!");
-            Terminal.this.logger.severe("Ending program.");
-            return;
-        }
-        onLoad();
-        Terminal.this.logger.info("Service start!");
-        onFinish();
-
-
+        onStart();
         while(isStart){
             commandHandle(onRead());
         }

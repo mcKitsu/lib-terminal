@@ -1,14 +1,18 @@
-package net.mckitsu.lib.terminal;
+package net.mckitsu.lib.terminal.commands;
 
-public class CommandReload implements TerminalCommand {
+import net.mckitsu.lib.terminal.Terminal;
+import net.mckitsu.lib.terminal.TerminalCommand;
+
+public class CommandStop implements TerminalCommand {
+
     @Override
     public String getCommand() {
-        return "reload";
+        return "stop";
     }
 
     @Override
     public String getDescription() {
-        return "Reloading resource config.";
+        return "Stop service.";
     }
 
     @Override
@@ -19,14 +23,13 @@ public class CommandReload implements TerminalCommand {
 
     @Override
     public boolean handle(Terminal terminal, String[] args) {
-        terminal.getLogger().info("Service reloading...");
-        terminal.onLoad();
-        terminal.getLogger().info("Service reload!");
+        terminal.getLogger().info("Stop");
+        terminal.stop();
         return true;
     }
 
     @Override
     public String getCommandFormat() {
-        return "reload";
+        return "stop";
     }
 }

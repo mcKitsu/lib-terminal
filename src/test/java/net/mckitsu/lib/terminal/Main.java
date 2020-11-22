@@ -1,5 +1,10 @@
 package net.mckitsu.lib.terminal;
 
+import net.mckitsu.lib.terminal.commands.CommandHelp;
+import net.mckitsu.lib.terminal.commands.CommandReload;
+import net.mckitsu.lib.terminal.commands.CommandRestart;
+import net.mckitsu.lib.terminal.commands.CommandStop;
+
 import java.util.Scanner;
 
 public class Main {
@@ -13,24 +18,13 @@ public class Main {
             private Scanner scanner = new Scanner(System.in);
 
             @Override
-            protected void onFinish() {
-                getLogger().info("onFinish");
-            }
-
-            @Override
             protected boolean onStart() {
-                getLogger().info("onStart");
+                this.add(new CommandHelp(this.getCommands()));
+                this.add(new CommandReload());
+                this.add(new CommandRestart());
+                this.add(new CommandStop());
+
                 return true;
-            }
-
-            @Override
-            protected void onLoad() {
-                getLogger().info("onLoad");
-            }
-
-            @Override
-            protected void onStop() {
-                getLogger().info("onStop");
             }
 
             @Override

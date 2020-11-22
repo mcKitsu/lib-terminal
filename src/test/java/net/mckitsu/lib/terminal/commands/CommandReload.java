@@ -1,16 +1,17 @@
-package net.mckitsu.lib.terminal;
+package net.mckitsu.lib.terminal.commands;
 
+import net.mckitsu.lib.terminal.Terminal;
+import net.mckitsu.lib.terminal.TerminalCommand;
 
-public class CommandRestart implements TerminalCommand {
-
+public class CommandReload implements TerminalCommand {
     @Override
     public String getCommand() {
-        return "restart";
+        return "reload";
     }
 
     @Override
     public String getDescription() {
-        return "Restart service.";
+        return "Reloading resource config.";
     }
 
     @Override
@@ -21,12 +22,12 @@ public class CommandRestart implements TerminalCommand {
 
     @Override
     public boolean handle(Terminal terminal, String[] args) {
-        terminal.restart();
+        terminal.getLogger().info("Reload");
         return true;
     }
 
     @Override
     public String getCommandFormat() {
-        return "restart";
+        return "reload";
     }
 }
