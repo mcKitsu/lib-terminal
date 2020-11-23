@@ -9,7 +9,7 @@ import java.util.logging.Logger;
  * @author  ZxyKira
  */
 public abstract class Terminal {
-    private Map<String, TerminalCommand> commands;
+    private final Map<String, TerminalCommand> commands;
 
     private boolean isStart;
     private java.util.logging.Logger logger;
@@ -20,7 +20,7 @@ public abstract class Terminal {
     /**
      * When service start after call this method.
      */
-    protected abstract boolean onStart();
+    protected abstract void onStart();
 
     protected abstract String onRead();
 
@@ -141,9 +141,17 @@ public abstract class Terminal {
     }
 
     private void terminalRunnable(){
-        onStart();
+        this.onStart();
         while(isStart){
-            commandHandle(onRead());
+            String input = onRead();
+            if(input == null)
+                continue;
+
+            if(input.isEmpty())
+                continue;
+
+            this.commandHandle(input);
+
         }
     }
 }

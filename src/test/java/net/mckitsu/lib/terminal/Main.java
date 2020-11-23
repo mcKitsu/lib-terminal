@@ -18,13 +18,12 @@ public class Main {
             private Scanner scanner = new Scanner(System.in);
 
             @Override
-            protected boolean onStart() {
+            protected void onStart() {
                 this.add(new CommandHelp(this.getCommands()));
                 this.add(new CommandReload());
                 this.add(new CommandRestart());
                 this.add(new CommandStop());
 
-                return true;
             }
 
             @Override
