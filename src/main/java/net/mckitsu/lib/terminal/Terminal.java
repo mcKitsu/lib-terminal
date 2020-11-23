@@ -57,6 +57,10 @@ public abstract class Terminal {
     /* **************************************************************************************
      *  Public method
      */
+    public boolean isStart(){
+        return this.isStart;
+    }
+
     public Map<String, TerminalCommand> getCommands(){
         return this.commands;
     }
